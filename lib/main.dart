@@ -4,6 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:convert';
 import 'services/ble_service.dart';
 import 'widgets/device_list_widget.dart';
+import 'screens/attendance_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -132,6 +133,25 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AttendanceScreen(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.people),
+                  label: const Text('Attendance'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 12),
+                  ),
+                ),
+              ),
               // Scan Button
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -148,13 +168,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
                   ),
                 ),
               ),
-
+              // Attendance Button
+              
               // Device List
               DeviceListWidget(
                 scanResults: _bleService.scanResults,
