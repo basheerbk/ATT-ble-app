@@ -1,9 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';
 
-class AttendanceScreen extends StatelessWidget {
+class AttendanceScreen extends StatefulWidget {
   const AttendanceScreen({super.key});
+
+  @override
+  State<AttendanceScreen> createState() => _AttendanceScreenState();
+}
+
+class _AttendanceScreenState extends State<AttendanceScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _blinkController;
+  bool isConnected = false; // This will be updated based on actual BLE connection status
+
+  @override
+  void initState() {
+    super.initState();
+    _blinkController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _blinkController.dispose();
+    super.dispose();
+  }
 
   Future<void> _showEnrollmentDialog(BuildContext context) async {
     showDialog(
@@ -15,33 +37,22 @@ class AttendanceScreen extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState != ConnectionState.done) {
               return const Dialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12.0)),
-                ),
-                backgroundColor: Color(0xFF243647),
+                backgroundColor: Colors.white,
                 child: Padding(
-                  padding: EdgeInsets.all(32.0),
+                  padding: EdgeInsets.all(20.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
+                      CircularProgressIndicator(),
                       SizedBox(height: 16),
-                      Text(
-                        'Enrolling...',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      Text('Enrolling...'),
                     ],
                   ),
                 ),
               );
             }
             return Dialog(
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(12.0)),
-              ),
-              backgroundColor: const Color(0xFF243647),
+              backgroundColor: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
@@ -87,12 +98,17 @@ class AttendanceScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+              
+              const SizedBox(height: 12),
               // Sync with device button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
                     // Write the syncing logic here
+                    setState(() {
+                      isConnected = !isConnected; // Toggle for testing, replace with actual BLE logic
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
@@ -102,12 +118,46 @@ class AttendanceScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Sync with Device',
+                  child: Text(
+                    isConnected ? 'Disconnect Device' : 'Sync with Device',
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
               ),
+              const SizedBox(height: 12),
+              // Connection status indicator
+              Row(
+                children: [
+                  AnimatedBuilder(
+                    animation: _blinkController,
+                    builder: (context, child) {
+                      return Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isConnected
+                              ? Color.lerp(
+                                  Colors.green,
+                                  Colors.green.withOpacity(0.3),
+                                  _blinkController.value,
+                                )
+                              : Colors.red,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    isConnected ? 'Device connected' : 'Device not connected',
+                    style: TextStyle(
+                      color: isConnected ? Colors.green : Colors.red,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 20),
               // Students section
               const Text(
@@ -163,6 +213,33 @@ class AttendanceScreen extends StatelessWidget {
                                   ),
                                 ),
                               ],
+                            ),
+                          ),
+                          // Attendance Status Indicator
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Container(
+                              width: 70, // Fixed width for consistent sizing
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: [const Color.fromARGB(69, 76, 175, 79), const Color.fromARGB(69, 244, 67, 54), const Color.fromARGB(69, 255, 153, 0)][index % 3],
+                                borderRadius: BorderRadius.circular(20),
+                                //border colour changes with attendance status
+                                border: Border.all(
+                                  color: [Colors.green, Colors.red, const Color(0xFFFF9800)][index % 3],
+                                  width: 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  ['Present', 'Absent', 'Late'][index % 3],
+                                  style: TextStyle(
+                                    color: [Colors.green, Colors.red, const Color(0xFFFF9800)][index % 3],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           // Enroll button

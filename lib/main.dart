@@ -133,7 +133,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Column(
             children: [
-              Padding(
+               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: ElevatedButton.icon(
                   onPressed: () {
@@ -172,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               // Attendance Button
-              
+             
               // Device List
               DeviceListWidget(
                 scanResults: _bleService.scanResults,
